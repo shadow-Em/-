@@ -1,0 +1,651 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<title>shop_管理员界面</title>
+<link href="../css/main.css" rel="stylesheet"/>
+<script src="../js/vue.min.js"></script>
+<!-- 引入样式 -->
+<link rel="stylesheet" href="../element-ui/index.css">
+<!-- 引入组件库 -->
+<script src="../element-ui/index.js"></script>
+<script src="../element-ui/axios.min.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+	<div id="main">
+    <!-- 标题 -->
+    <div class="titlePart">
+        <h1>Welcome!Administrator</h1>
+    </div>
+    <!-- 导航栏 -->
+    <div class="navigate">    
+        <el-menu :default-active="barIndex" class="el-menu-demo" mode="horizontal"
+        @select="handleSelect" background-color="#668B8B" text-color="#fff" active-text-color="#CDC1C5">
+            <el-menu-item index="1">客户记录</el-menu-item>
+            <el-menu-item index="2">个人信息</el-menu-item>
+            
+            <el-menu-item index="3">商品管理</el-menu-item>
+            <el-menu-item index="4">销售统计</el-menu-item>
+            <el-menu-item index="7">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            </el-menu-item>
+            <el-menu-item index="2"><div >欢迎您！{{user.uName}}</div></el-menu-item>
+            <el-menu-item index="6">退出登录</el-menu-item>
+        </el-menu>
+    </div>
+    <!-- 主页 -->
+    <div v-if = "barIndex==7"></div>
+    <!-- 客户记录 -->
+    <div v-if = "barIndex==1" class="part">
+        <h2 class="shoppingCarh2 browsedh2">客户记录</h2>
+        <div class="browsedPart">
+        <el-table :data="customerInfo" border style="width: 100%" empty-text="暂无客户记录" lazy="true"  highlight-current-row
+            max-height="530">
+            <el-table-column prop="rTime" label="时间" width="173"> </el-table-column> 
+            <el-table-column prop="uName" label="用户" width="162"></el-table-column>
+            <el-table-column prop="uDo" label="行为" width="188"></el-table-column>
+            <el-table-column prop="pName" label="商品" width="164"> </el-table-column>
+            <el-table-column prop="pBuyNum" label="数量" width="164"> </el-table-column>     
+        </el-table>   
+        </div>
+    </div>
+    <!-- 个人信息 -->
+    <div v-if = "barIndex==2" class="part">
+        <h2 style="color:#606266;padding-top:20px;padding-bottom:20px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;个人信息</h2>
+        <div id="userInfo">
+            <el-form ref="user" :model="user" label-width="80px">
+                <el-form-item label="账号">
+                    <el-input v-model="user.uNo" placeholder="请输入账号" :disabled="true" ></el-input>
+                </el-form-item>
+                <el-form-item label="用户名">
+                    <el-input v-model="user.uName" placeholder="请输入用户名" ></el-input>
+                </el-form-item>
+                <el-form-item label="地址">
+                    <el-input v-model="user.uAddress" placeholder="请输入地址" ></el-input>
+                </el-form-item>
+                <el-form-item label="邮箱">
+                    <el-input v-model="user.uEmail" placeholder="请输入邮箱" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="密码">
+                    <el-input placeholder="请输入密码" v-model="user.uPassword" show-password ></el-input>
+                </el-form-item>
+                <el-form-item label="账户金额" >
+                    <el-input v-model="user.uBalance" placeholder="请输入金额" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <!--<el-button type="primary" v-on:click="daydream">提现</el-button>-->
+                    <el-button type="primary" v-on:click="changeUserInfo">修改</el-button>         
+                </el-form-item>
+            </el-form>
+        </div>
+    </div>
+    <!-- 销售统计 -->
+    <div v-if = "barIndex==4" class="part">
+        <h2 class="shoppingCarh2 browsedh2">销售记录</h2>
+        <div class="browsedPart">
+        <el-table :data="product" border style="width: 100%" empty-text="暂无销售记录" lazy="true"  highlight-current-row
+        show-summary="true" sum-text="合计" :summary-method="getSummaries" max-height="530">
+            <!-- <el-table-column type="expand">
+                <template slot-scope="props">
+                    <el-form label-position="left" inline class="demo-table-expand">
+                        <el-form-item label="商品编号">
+                        <span>{{ props.row.gNo }}</span>
+                        </el-form-item>
+                        <el-form-item label="商品简介">
+                        <span>{{ props.row.gIntroduce }}</span>
+                        </el-form-item>
+                        <el-form-item label="商品详情">
+                        <span>{{ props.row.gDetail }}</span>
+                        </el-form-item>
+                    </el-form>
+                </template>
+            </el-table-column> -->
+            <el-table-column prop="pName" label="商品名称" width="160"></el-table-column>
+            <el-table-column prop="pStatus" label="销售状态" width="190"></el-table-column>
+            <el-table-column prop="pMoney" label="售价/￥" width="140"> </el-table-column>
+            <el-table-column prop="pBuyNum" label="销售数量/件" width="156"> </el-table-column>  
+            <el-table-column prop="pAllMoney" label="销售金额/￥" width="156"> </el-table-column> 
+        </el-table>   
+        </div>
+    </div>
+    <!-- 商品信息 -->
+    <div v-if = "barIndex==3" class="part">
+        <el-button type="text" @click="addNewGoods"><h2 class="shoppingCarh2">新增商品</h2></el-button>
+        <div>
+        <div class="goodsPart" v-for= "(i,index) in allProduct">
+            <img v-bind:src="i.pUrl" class="goodsImg">
+            <div class="goodsPartInfo">
+                <h2 class="goodsTitle">{{i.pName}}</h2>
+                <div class="fenge"></div>
+                <p class="describe1">{{i.pIntroduce}}</p>
+                <div class="goodBottom1">
+                    <p class="gMoney1"><strong>售价：￥</strong>{{i.pMoney}}</p>
+                    <p class="reserve1"><strong>余量：</strong>{{i.pNumber}}&nbsp;<strong>件</strong></p>
+                </div>
+                <div>
+                    <el-button type="primary" @click="changeGoods(index)">修改信息</el-button>
+                    <!--<el-button type="primary" @click="deleteGoods(i.pNo)">下架商品</el-button>-->
+					<el-button type="primary">下架商品</el-button>
+                </div>
+            </div>    
+        </div>
+        </div>
+        <!-- 修改/新增商品Dialog -->
+        <div class="goodsCard">
+            <el-dialog  :visible.sync="readMoreJug" class="goodsCardDialog" fullscreen ="true">
+                    <h1 v-if="productIndex==-1">新增商品</h1>
+                    <h1 v-else>修改商品</h1>
+                <div class="goodsDiglog">
+                    
+                    <el-form ref="productInfo" :model="productInfo" label-width="80px">
+                        <el-form-item label="商品名">
+                            <el-input v-model="productInfo.pName" placeholder="请输入商品名"></el-input>
+                        </el-form-item>
+                        <el-form-item label="简介">
+                            <el-input v-model="productInfo.pIntroduce" placeholder="请输入简介"></el-input>
+                        </el-form-item>
+                        <el-form-item label="定价">
+                            <el-input v-model="productInfo.pMoney" placeholder="请输入定价"></el-input>
+                        </el-form-item>
+                        <el-form-item label="数量">
+                            <el-input placeholder="请输入数量" v-model="productInfo.pNumber" ></el-input>
+                        </el-form-item>
+                        <el-form-item v-for="(pParam, index) in productInfo.pParams" :label="'参数' + index" :key="pParam.key" :prop="'pParams.' + index + '.val'">
+                            <el-input v-model="pParam.value" class="elinput"></el-input>
+                            <el-button @click.prevent="removeGParam(pParam)">删除</el-button>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-upload
+                            action=""
+                            list-type="picture-card"
+                            :on-change="handleChange"
+                            :on-remove="handleRemove"
+                            :data="productInfo"
+                            :auto-upload="false"
+                            multiple
+                            :limit="2"
+                            :file-list="fileList"
+                            accept="image/jpeg,image/x-png">
+                            <i class="el-icon-plus"></i>
+                            </el-upload>
+                        </el-form-item>
+                        <el-form-item >
+                                <el-button @click="addGParam">新增参数</el-button>
+                                <el-button type="primary" @click="changeGoodsInfo()">上传</el-button>  
+                        </el-form-item>   
+                    </el-form>
+                </div>
+                
+                <!-- <img v-bind:src='goods[goodsIndex].gUrl' class="goodsDetailImg">
+                <img v-bind:src='goods[goodsIndex].gUrl2' class="goodsDetailImg">
+                <p><strong><font size="4">详情</font></strong></p>
+                <p>{{goods[goodsIndex].gIntroduce}}</p>
+                <p>{{goods[goodsIndex].gDetail}}</p>
+                <div class="fenge"></div>
+                <div class="goodsCardBottom"><p><strong>售价：￥</strong>{{goods[goodsIndex].gMoney}}</p><p><strong>余量：</strong>{{goods[goodsIndex].gReserve}}&nbsp;<strong>件</strong></p></div>
+                <el-button type="primary" v-if="isAddGoods" @click="AddGoods(goodsIndex)">加入购物车</el-button>
+                <el-button type="info" disabled v-else>已售罄</el-button> -->
+            </el-dialog>
+        </div>
+    </div>
+
+</div>
+<script>
+    var main = new Vue({
+        el:"#main",
+        data(){
+            return {
+                user:{
+                	uName:"",
+                },
+                barIndex:7,
+                product:[],
+                allProduct:[],
+                productIndex:1,
+                customerInfo:[],
+                readMoreJug:false,
+                fileList:[],
+                fileListCnt:0,
+                productInfo:{
+                    pNo:'',
+                    pName:'',
+                    pIntroduce:'',
+                    pMoney:'',
+                    pNumber:'',
+                    pUrl:'',
+                    pDetail:'',
+                    pParams:[],
+                    pUrl2:''
+                }
+            }
+        },
+        methods:{
+            handleSelect(key,keyPath){
+                var ctx = this
+                console.log(key)
+                //退出登录
+                if(key == 6){
+                    axios.get('/JavaWeb/logout')
+                    .then(function (resp) {
+                        window.location.href='/JavaWeb/index.html';
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });       
+                } 
+                if(key==1||key==2){
+                    ctx.checkTime()
+                }     
+                ctx.barIndex = key
+                //客户记录
+                if(ctx.barIndex==1){ 
+                    axios.get('/JavaWeb/load-customer-info')
+                    .then(function (resp) {
+                        ctx.product=[]
+                        ctx.customerInfo = resp.data
+                        if(ctx.customerInfo[0].pNo==="")
+                            ctx.customerInfo=[]
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                }
+                else if(ctx.barIndex==2){         
+                axios.get('/JavaWeb/get-user-info')
+                .then(function (resp) {
+                    console.log(resp.data);
+                    ctx.user = resp.data                    
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }); 
+                }
+                else if(ctx.barIndex==4){
+                    axios.get('/JavaWeb/get-user-info')
+                    .then(function (resp) {
+                        console.log(resp.data);
+                        ctx.user = resp.data                    
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }); 
+                    axios.get('/JavaWeb/load-bought-product')
+                    .then(function (resp) {
+                        console.log('exist:',resp.data[0].exist);
+                        if(resp.data[0].exist == 0){
+                            ctx.$message({
+                            message:'登录超时!请重新登录！',
+                            type:'error'
+                            }) 
+                            setTimeout(function(){
+                                window.location.href='/JavaWeb/index.html';
+                            },500)
+                            return false                   
+                        } 
+                        ctx.customerInfo=[]
+                        ctx.product = resp.data
+                        if(ctx.product[0].pNo==="")
+                            ctx.product=[]
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                }
+                
+                //商品管理
+                else if(ctx.barIndex==3){
+                    var ctx = this
+                    axios.get('/JavaWeb/load-goods')
+                    .then(function (resp) {
+                        console.log('exist:',resp.data[0].exist);
+                        if(resp.data[0].exist == 0){
+                            ctx.$message({
+                            message:'登录超时!请重新登录！',
+                            type:'error'
+                            }) 
+                            setTimeout(function(){
+                                window.location.href='/JavaWeb/index.html';
+                            },500)
+                            return false                   
+                        } 
+                        ctx.allProduct = resp.data
+						console.log(ctx.allProduct);
+                        if(ctx.allProduct[0].pNo==="")
+                            ctx.allProduct=[]
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                }
+            },
+             //登录超时检测
+            checkTime(){
+                var ctx= this
+                axios.get('/JavaWeb/check-time')
+                .then(function (resp) {
+                    console.log('exist:',resp.data.exist);
+                    if(resp.data.exist == 0){
+                        ctx.$message({
+                        message:'登录超时!请重新登录！',
+                        type:'error'
+                        }) 
+                        setTimeout(function(){
+                            window.location.href='/JavaWeb/index.html';
+                        },500)
+                        return false                   
+                    } 
+                    return true       
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            },
+            changeUserInfo(){
+                var ctx = this
+                var params = new URLSearchParams({
+                        uNo: ctx.user.uNo,
+						uName:ctx.user.uName,
+                        uPassword: ctx.user.uPassword,
+                        uEmail:ctx.user.uEmail,
+                        uAddress:ctx.user.uAddress,
+                        uBalance:ctx.user.uBalance
+                    })
+                axios.post('/JavaWeb/change-user-info', params)
+                .then(function (resp) {
+                    console.log(resp)
+                    //登录超时
+                    if(resp.data.exist==0){          
+                        ctx.$message({
+                            message:'登录超时！请重新登录',
+                            type:'error'
+                        })
+                        setTimeout(function(){
+                            window.location.href='/JavaWeb/index.html';   
+                        },500) 
+                            
+                    }
+                    else{
+                        ctx.$message({
+                            message:'修改成功！',
+                            type:'success'
+                        })  
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+                },
+            daydream(){
+                var ctx = this
+                ctx.$alert('醒醒吧~别做梦了~',
+                                 'Daydream', {
+                                confirmButtonText: '确定',
+                                });
+            },
+            getSummaries(param) {
+                const { columns, data } = param;
+                const sums = [];
+                columns.forEach((column, index) => {
+                if (index === 0) {
+                    sums[index] = '合计';
+                    return;
+                }
+                else if(index==4)
+                {
+                    const values = data.map(item => Number(item[column.property]));
+                    sums[index] = values.reduce((prev, curr) => {
+                    const value = Number(curr);
+                    if (!isNaN(value)) {
+                        return prev + curr;
+                    } else {
+                        return prev;
+                    }
+                    }, 0);  
+                }
+                
+                });
+                return sums;
+            },
+            addNewGoods(){
+                var ctx = this
+                ctx.productInfo.pNo = ''
+                ctx.productInfo.pName = ''
+                ctx.productInfo.pIntroduce = ''
+                ctx.productInfo.pMoney = 0
+                ctx.productInfo.pNumber = 0
+                ctx.productInfo.pDetail = 0
+                ctx.productInfo.pParams=[{val:''}]
+                ctx.readMoreJug= true
+            },
+            changeGoods(productNo){
+                console.log(productNo)
+            },
+            //下架商品
+            deleteGoods(productNo){
+                var ctx = this
+                console.log(productNo)
+                var params = new URLSearchParams({
+                    pNo: productNo,       
+                })
+                axios.post('/JavaWeb/delete-product', params)
+                    .then(function (resp) {
+                        console.log(resp)
+                        //登录超时
+                        if(resp.data.exist==0){          
+                            ctx.$message({
+                                message:'登录超时！请重新登录',
+                                type:'error'
+                            })
+                            setTimeout(function(){
+                                window.location.href='/JavaWeb/index.html';   
+                            },500) 
+                                
+                        }
+                        else{
+                            ctx.$message({
+                                message:'商品下架成功！',
+                                type:'success'
+                            })  
+                            axios.get('/JavaWeb/load-goods')
+                            .then(function (resp) {
+                                ctx.allProduct = resp.data  
+                                if(ctx.allProduct[0].pNo==="")
+                                    ctx.allProduct=[]
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });    
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            //修改商品
+            changeGoods(productNo){
+                var ctx = this
+                ctx.productIndex = productNo
+                if(ctx.productIndex!=-1){
+                    ctx.productInfo.pNo = ctx.allProduct[ctx.productIndex].pNo
+                    ctx.productInfo.pName = ctx.allProduct[ctx.productIndex].pName
+                    ctx.productInfo.pIntroduce = ctx.allProduct[ctx.productIndex].pIntroduce
+                    ctx.productInfo.pMoney = ctx.allProduct[ctx.productIndex].pMoney
+                    ctx.productInfo.pNumber = ctx.allProduct[ctx.productIndex].pNumber
+                    ctx.productInfo.pDetail = ctx.allProduct[ctx.productIndex].pDetail
+                    var p = ctx.productInfo.pDetail.split('|')
+                    console.log(ctx.productInfo)
+                    ctx.productInfo.pParams=[]
+                    for(var i=0;i<p.length;i++){
+                        ctx.productInfo.pParams.push({
+                        value: p[i],
+                        key: 'val'
+                        });
+                    }
+                    console.log("p",p)
+                    console.log("pParams",ctx.productInfo.pParams)               
+                }
+                ctx.readMoreJug= true
+
+            },
+            uploadFile (content) {
+            // doNothing
+            },
+            //删除参数
+            removeGParam(item){
+                var index = this.productInfo.pParams.indexOf(item)
+                if (index !== -1) {
+                this.productInfo.pParams.splice(index, 1)
+        }
+            },
+            //新增参数
+            addGParam(){
+                this.productInfo.pParams.push({
+                    value: '',
+                    key: 'val'
+                    });
+            },
+            //上传修改/新增商品的信息
+            changeGoodsInfo(){
+                var ctx = this
+                ctx.productInfo.pDetail=''
+                for(var i=0;i<ctx.productInfo.pParams.length;i++){
+                    ctx.productInfo.pDetail+=ctx.productInfo.pParams[i].value
+                    if(i<ctx.productInfo.pParams.length-1)
+                    ctx.productInfo.pDetail+='|'
+                    }
+                console.log(ctx.productInfo.pDetail)
+                let productInfo = JSON.stringify(this.productInfo)
+                let formData = new FormData()
+                console.log(this.fileList.length)
+                if (this.fileList.length > 0) {
+                    this.fileList.forEach (file => {
+                    formData.append('files', file.raw)
+                    })
+                }
+                formData.append('productInfo', productInfo)
+                axios({
+                    method: 'post',
+                    url: '/JavaWeb/add-new-product',
+                    headers: {
+                    'Content-Type': 'multipart/form-data;'
+                    },
+                    data:formData
+                }).then (function (res) {
+                    // console.log(JSON.stringify(res))
+                    if(res.status === 200){ //?
+                    // 用this报错
+                    ctx.$message({
+                        message: '成功',
+                        type: 'success',
+                        duration: 1500
+                    })
+                    }
+                    ctx.readMoreJug= false
+                    axios.get('/JavaWeb/load-goods')
+                    .then(function (resp) {
+                        ctx.allProduct = resp.data
+                        if(ctx.allProduct[0].pNo==="")
+                            ctx.allProduct=[]
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+                }).catch(function(error) {
+                    console.log('in BubbleBox.submitUpload(), catch $axios error: ' + error)
+                })
+            },
+            handleChange(file, fileList){
+                var limit = this.$limitFile(file)
+                if(limit === 0) {  // 新上传的文件符合要求
+                    this.fileList = fileList
+                    this.fileListCnt = this.fileList.length
+                } else {
+                    if(limit === 1)
+                    this.$message.error('上传图片只能是 JPG 或 PNG 格式!')
+                    else if(limit === 2)
+                    this.$message.error('上传图片大小不能超过 2MB!')
+                    console.log('fileList.length: ' + fileList.length)
+                    fileList.pop()  // 阻止上传
+                }
+                console.log('' + typeof fileList[0] + '| this.fileListCnt: ' + this.fileListCnt)
+            },
+            handleRemove(file, fileList){
+                this.fileList = fileList
+                this.fileListCnt = this.fileList.length
+                console.log('this.fileListCnt: ' + this.fileListCnt)
+            }
+
+        },
+        watch: {
+            fileListCnt: function (val, oldVal) {
+            if(val >= 2) {
+                // 图片上传数量 >= 3时，不允许继续上传
+                var e = $(".el-upload--picture-card")
+                e.css('display','none')
+                // console.log(val +': ' + e.attr("class"))
+            } else {
+                var e = $(".el-upload--picture-card")
+                e.css('display','inline-block')
+                // console.log(val +': ' + e.attr("class"))
+            }
+            }
+        },
+        mounted: function() {   
+            	var ctx = this         
+                axios.get('/JavaWeb/get-user-info')
+                .then(function (resp) {
+                    console.log(resp.data);
+                    ctx.user = resp.data                    
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+				/*axios.get('/JavaWeb/load-goods')
+                .then(function (resp) {
+                    console.log('exist:',resp.data[0].exist);
+                    ctx.allProduct = resp.data
+                    if(ctx.allProduct[0].pNo==="")
+                        ctx.allProduct=[]
+                    
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });*/
+            }, 
+                  
+    })
+Vue.prototype.$limitFile = function (file) {
+  var type = file.name.substring(file.name.lastIndexOf('.')+1)
+  const isJPNG = (type === 'jpg' || type === 'jpeg' || type === 'png')
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isJPNG) {
+    // this.$message.error('上传图片只能是 JPG 或 PNG 格式!')
+    return 1
+  }
+  if (!isLt2M) {
+    // this.$message.error('上传图片大小不能超过 2MB!')
+    return 2
+  }
+  // return isJPNG && isLt2M
+  return 0
+}
+</script>
+</body>
+</html>

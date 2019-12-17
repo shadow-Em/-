@@ -1,0 +1,706 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<title>shop_用户界面</title>
+<link href="../css/main.css" rel="stylesheet"/>
+<script src="../js/vue.min.js"></script>
+<!-- 引入样式 -->
+<link rel="stylesheet" href="../element-ui/index.css">
+<!-- 引入组件库 -->
+<script src="../element-ui/index.js"></script>
+<script src="../element-ui/axios.min.js"></script>
+</head>
+
+<body>
+	<div id="main">
+		<!-- 标题 -->
+		<div class="titlePart">
+			<h1>Welcome to Shadow Store!</h1>
+		</div>
+		 <!-- 导航栏 -->
+		<div class="navigate">    
+			<el-menu :default-active="barIndex" class="el-menu-demo" mode="horizontal"
+			@select="handleSelect" background-color="#668B8B" text-color="#fff" active-text-color="#CDC1C5">
+				<el-menu-item index="1">主页</el-menu-item>
+				<el-menu-item index="2">全部商品</el-menu-item>
+				<el-submenu index="3">
+				<template slot="title">我的</template>
+				<el-menu-item index="6">个人信息</el-menu-item>
+				<el-menu-item index="7">浏览记录</el-menu-item>
+				<el-menu-item index="8">剁手记录</el-menu-item>
+				</el-submenu>
+				<el-menu-item index="4">购物车</el-menu-item>
+				<el-menu-item index="1">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+				</el-menu-item>
+				<el-menu-item index="6"><div >欢迎您！{{user.uName}}</div></el-menu-item>
+				<el-menu-item index="5">退出登录</el-menu-item>
+			</el-menu>
+		</div>
+		<!-- 主页图片 -->
+		<div v-if = "barIndex == 1">
+		</div>
+		<!-- 全部商品 -->
+		<div v-else-if = "barIndex == 2" class="part">
+			<div class="goodsPart" v-for= "(i,index) in product">
+				<img v-bind:src="i.pUrl" class="goodsImg">
+				<div class="goodsPartInfo">
+					<h2 class="goodsTitle">{{i.pName}}</h2>
+					<div class="fenge"></div>
+					<p class="describe">{{i.pIntroduce}}</p>
+					<div class="goodBottom">
+						<p class="gMoney"><strong>售价：￥</strong>{{i.pMoney}}</p>
+						<p class="reserve"><strong>余量：</strong>{{i.pNumber}}&nbsp;<strong>件</strong></p>
+						<el-button type="primary" @click="readMore(index)">查看详情</el-button>
+					</div>
+				</div>
+
+			</div>
+			<div class="goodsCard" v-if="product.length">
+				<el-dialog  :visible.sync="readMoreJug" class="goodsCardDialog" fullscreen ="true">
+					<h1>{{product[productIndex].pName}}</h1>
+					<img v-bind:src="product[productIndex].pUrl" class="goodsDetailImg">
+					<img v-bind:src="product[productIndex].pUrl2" class="goodsDetailImg">
+					<p><strong><font size="4">详情</font></strong></p>
+					<p>{{product[productIndex].pIntroduce}}</p>
+					<p v-for=" (i,index) in pParams">{{i.value}}</p>
+					<div class="fenge"></div>
+					<div class="goodsCardBottom"><p><strong>售价：￥</strong>{{product[productIndex].pMoney}}</p><p><strong>余量：</strong>{{product[productIndex].pNumber}}&nbsp;<strong>件</strong></p></div>
+					<el-button type="primary" v-if="isAddProduct" @click="AddGoods(productIndex)">加入购物车</el-button>
+					<el-button type="info" disabled v-else>已售罄</el-button>
+				</el-dialog>
+			</div>
+		</div>
+		<!-- 个人信息 -->
+		<div v-else-if = "barIndex==6" class="part">
+			<h2 style="color:#606266;padding-top:20px;padding-bottom:20px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;个人信息</h2>
+			<div id="userInfo">
+				<el-form ref="user" :model="user" label-width="150px">
+					<el-form-item label="账号">
+						<el-input v-model="user.uNo" placeholder="请输入账号" :disabled="true" ></el-input>
+					</el-form-item>
+					<el-form-item label="用户名">
+						<el-input v-model="user.uName" placeholder="请输入用户名" ></el-input>
+					</el-form-item>
+					<el-form-item label="地址">
+						<el-input v-model="user.uAddress" placeholder="请输入地址" ></el-input>
+					</el-form-item>
+					<el-form-item label="邮箱">
+						<el-input v-model="user.uEmail" placeholder="请输入邮箱" ></el-input>
+					</el-form-item>
+					<el-form-item label="密码">
+						<el-input placeholder="请输入密码" v-model="user.uPassword" show-password ></el-input>
+					</el-form-item>
+					<el-form-item label="充值金额" >
+						<el-input v-model="user.uBalance" placeholder="请输入金额" ></el-input>
+					</el-form-item>
+					<el-form-item>
+							<el-button type="primary" v-on:click="changeUserInfo">修改</el-button>  
+					</el-form-item>   
+				</el-form>
+			</div>
+		</div>
+		<!-- 浏览记录 -->
+		<div v-else-if = "barIndex==7" class="part">
+			<h2 class="shoppingCarh2 browsedh2">我的足迹</h2>
+			<div class="browsedPart">
+			<el-table :data="browsed" border style="width: 100%" empty-text="暂无浏览记录" lazy="true"  highlight-current-row
+			@current-change="handleBrowsedChange">
+				<el-table-column prop="rTime" label="时间" width="160"></el-table-column>
+				<el-table-column prop="pName" label="商品名称" width="120"></el-table-column>
+				<el-table-column prop="pIntroduce" label="简介" width="390"> </el-table-column>
+				<el-table-column prop="pMoney" label="售价/￥" width="90"> </el-table-column>
+				<el-table-column prop="pNumber" label="余量/件" width="90"> </el-table-column>
+			</el-table>   
+			</div>
+
+			<div class="goodsCard" v-if="product.length">
+				<el-dialog  :visible.sync="readMoreBrowsedJug" class="goodsCardDialog" fullscreen ="true">
+					<h1>{{product[productIndex].pName}}</h1>
+					<img v-bind:src="product[productIndex].pUrl" class="goodsDetailImg">
+					<img v-bind:src="product[productIndex].pUrl2" class="goodsDetailImg">
+					<p><strong><font size="4">详情</font></strong></p>
+					<p>{{product[productIndex].pIntroduce}}</p>
+					<p v-for=" (i,index) in pParams">{{i.value}}</p>
+					<div class="fenge"></div>
+					<div class="goodsCardBottom"><p><strong>售价：￥</strong>{{product[productIndex].pMoney}}</p><p><strong>余量：</strong>{{product[productIndex].pNumber}}&nbsp;<strong>件</strong></p></div>
+					<el-button type="primary" v-if="isAddProduct" @click="AddGoods(productIndex)">加入购物车</el-button>
+					<el-button type="info" disabled v-else>已售罄</el-button>
+				</el-dialog>
+			</div>
+		</div>
+		<!-- 已购买 -->
+		<div v-else-if = "barIndex==8" class="part">
+			<h2 class="shoppingCarh2 browsedh2">已购买</h2>
+			<div class="browsedPart">
+			<el-table :data="hasBrought" border style="width: 100%" empty-text="暂无购买记录" lazy="true"  highlight-current-row>
+				<el-table-column prop="rTime" label="购买时间" width="160"></el-table-column>
+				<el-table-column prop="pName" label="商品名称" width="120"></el-table-column>
+				<el-table-column prop="pIntroduce" label="简介" width="300"> </el-table-column>
+				<el-table-column prop="pMoney" label="售价/￥" width="90"> </el-table-column>
+				<el-table-column prop="pBuyNum" label="数量/件" width="90"> </el-table-column>
+				<el-table-column prop="pAllMoney" label="总花费/￥" width="90"> </el-table-column> 
+			</el-table>   
+			</div>
+		</div>
+		<!-- 购物车 -->
+		<div v-else-if = "barIndex==4" class="part shoppingCar">
+			<el-button type="text" @click="buyAll" v-if="shoppingCar.length"><h2 class="shoppingCarh2">清空购物车</h2></el-button>
+			<div>
+			<div class="goodsPart" v-for= "(i,index) in shoppingCar">
+				<img v-bind:src="i.pUrl" class="goodsImg">
+				<div class="goodsPartInfo">
+					<h2 class="goodsTitle">{{i.pName}}</h2>
+					<div class="fenge"></div>
+					<p class="describe1">{{i.pIntroduce}}</p>
+					<div class="goodBottom1">
+						<p class="gMoney1"><strong>售价：￥</strong>{{i.pMoney}}</p>
+						<p class="reserve1"><strong>数量：</strong>{{i.pBuyNum}}&nbsp;<strong>件</strong></p>
+					</div>
+					<div>
+						<el-button type="primary" @click="buyOne(index)" v-if="i.pNumber>0">立即购买</el-button>
+						<el-button type="info"  disabled v-else>被抢光啦</el-button>
+						<el-button type="primary" @click="deleteOne(index)">立即删除</el-button>
+					</div>
+				</div>    
+			</div>
+			</div>
+		</div>
+
+	</div>
+	<script>
+		var main = new Vue({
+            el: "#main",
+            data(){
+                return{
+                    user:{
+                        uNo:"",
+                        uName:"",
+						uPassword:"",
+                        uEmail:"", 
+                        uAddess:"",
+                        uBalance:0
+                    },
+                    barIndex:1,
+                    product:{
+                        pName:""
+                    },
+                    pParams:[],
+                    shoppingCar:[],
+                    readMoreJug:false,
+                    readMoreBrowsedJug:false,
+                    productIndex:1,
+                    // browsedIndex:0,
+                    isAddProduct:true,
+                    browsedRow: null,
+                    browsed:
+                    [
+                        {
+                            rTime:"2017-12-12 12:45:45",
+                            pName:"简约风-笔记本",
+                            pBuyNum: 10,
+                            pMoney:4,
+                            pAllMoney:10*4
+                        },
+                        {
+                            rTime:"2017-12-12 12:45:45",
+                            pName:"json",
+                            pIntroduce:"C++ Primer",
+                            pMoney:90,
+                            pNumber:20 
+                        }
+                    ],
+                    hasBrought:null
+                }
+            },
+            methods:{
+                //导航栏控制选择的
+                handleSelect(key, keyPath) {
+                    var ctx = this
+                    //退出登录
+                    if(key == 5){
+                        axios.get('/JavaWeb/logout')
+                            .then(function (resp) {
+                                window.location.href='/JavaWeb/index.html';
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });       
+                        } 
+                    if(key==1){
+                        ctx.checkTime()
+                    }     
+                    ctx.barIndex = key
+
+                    //加载商品信息
+                    if(ctx.barIndex==2){
+                        axios.get('/JavaWeb/load-goods')
+                        .then(function (resp) {
+                            console.log('exist:',resp.data[0].exist);
+                            if(resp.data[0].exist == 0){
+                                ctx.$message({
+                                message:'登录超时!请重新登录！',
+                                type:'error'
+                                }) 
+                                setTimeout(function(){
+                                    window.location.href='/JavaWeb/index.html';
+                                },500)
+                                return false                   
+                            } 
+                            ctx.product = resp.data
+                            if(ctx.product[0].pNo==="")
+                                ctx.product=[]
+                                
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+
+                    }
+                    //加载购物车
+                    else if(ctx.barIndex==4){
+                        axios.get('/JavaWeb/load-shopping-car')
+                        .then(function (resp) {
+                            console.log('exist:',resp.data[0].exist);
+                            if(resp.data[0].exist == 0){
+                                ctx.$message({
+                                message:'登录超时!请重新登录！',
+                                type:'error'
+                                }) 
+                                setTimeout(function(){
+                                    window.location.href='/JavaWeb/index.html';
+                                },500)
+                                return false                   
+                            } 
+                            ctx.shoppingCar = resp.data 
+                            if(ctx.shoppingCar[0].pNo==="")
+                                ctx.shoppingCar =[]
+                            console.log(ctx.shoppingCar)
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                    }
+                    else if(ctx.barIndex==6){
+                        // var ctx = this         
+                        axios.get('/JavaWeb/get-user-info')
+                            .then(function (resp) {
+                                console.log(resp.data);
+                                ctx.user = resp.data                    
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            }); 
+                    }
+                    else if(ctx.barIndex==7){
+                        // var ctx = this         
+                        axios.get('/JavaWeb/load-my-browsed')
+                        .then(function (resp) {
+                            if(resp.data[0].exist == 0){
+                            ctx.$message({
+                            message:'登录超时!请重新登录！',
+                            type:'error'
+                            }) 
+                            setTimeout(function(){
+                                window.location.href='/JavaWeb/index.html';
+                            },500)
+                            return false                   
+                            } 
+                            console.log(resp.data);
+                            ctx.browsed = resp.data 
+                            console.log('browsed',ctx.browsed );                   
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        }); 
+                    }
+                    else if(ctx.barIndex==8){
+                        // var ctx = this         
+                        axios.get('/JavaWeb/load-my-bought')
+                        .then(function (resp) {
+                            if(resp.data[0].exist == 0){
+                            ctx.$message({
+                            message:'登录超时!请重新登录！',
+                            type:'error'
+                            }) 
+                            setTimeout(function(){
+                                window.location.href='/JavaWeb/index.html';
+                            },500)
+                            return false                   
+                            } 
+                            console.log(resp.data);
+                            ctx.hasBrought = resp.data 
+                            console.log('hasBrought',ctx.hasBrought );                   
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        }); 
+
+                    }
+
+
+                },
+                //修改个人资料
+                changeUserInfo(){
+                    var ctx = this
+                    var params = new URLSearchParams({
+                            uNo: ctx.user.uNo, 
+							uName:ctx.user.uName,
+                            uPassword: ctx.user.uPassword,
+                            uEmail:ctx.user.uEmail,
+                            uAddress:ctx.user.uAddress,
+                            uBalance:ctx.user.uBalance  
+                        })
+                        axios.post('/JavaWeb/change-user-info', params)
+                            .then(function (resp) {
+                                console.log(resp)
+                                //登录超时
+                                if(resp.data.exist==0){          
+                                    ctx.$message({
+                                        message:'登录超时！请重新登录',
+                                        type:'error'
+                                    })
+                                    setTimeout(function(){
+                                        window.location.href='/JavaWeb/index.html';   
+                                    },500) 
+                                      
+                                }
+                                else{
+                                    ctx.$message({
+                                        message:'修改成功！',
+                                        type:'success'
+                                    })  
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                },
+                
+                 //登录超时检测
+                checkTime(){
+                    var ctx= this
+                    axios.get('/JavaWeb/check-time')
+                    .then(function (resp) {
+                        console.log('exist:',resp.data.exist);
+                        if(resp.data.exist == 0){
+                            ctx.$message({
+                            message:'登录超时!请重新登录！',
+                            type:'error'
+                            }) 
+                            setTimeout(function(){
+                                window.location.href='/JavaWeb/index.html';
+                            },500)
+                            return false                   
+                        } 
+                        return true       
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                },
+
+                //浏览商品信息
+                readMore(index){
+                    // console.log(index)
+                    var ctx =this
+                    ctx.pParams = []
+                   
+                    
+                    ctx.productIndex=index 
+                    var p = (ctx.product[ctx.productIndex].pDetail||'').split('|')
+                    for(var i=0;i<p.length;i++){
+                        ctx.pParams.push({
+                        value: p[i],
+                        key: 'val'
+                        });
+                    }
+                    ctx.readMoreJug = true
+                    if(ctx.product[ctx.productIndex].pNumber == 0){
+                        ctx.isAddProduct = false
+                    }
+                    else
+                        ctx.isAddProduct = true
+                    console.log("浏览商品信息")
+                    //添加记录
+                    var params = new URLSearchParams({
+                            pNo: ctx.product[ctx.productIndex].pNo
+                        })
+                    axios.post('/JavaWeb/add-browsed-record', params)
+                            .then(function (resp) {
+                            if(resp.data.exist==0){        
+                                ctx.$message({
+                                    message:'登录超时!请重新登录！',
+                                    type:'error'
+                                })  
+                                setTimeout(function(){
+                                    window.location.href='/JavaWeb/index.html';
+                                },500)
+                                return false      
+                            }
+                            else
+                                console.log("添加浏览记录成功")                          
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                },
+                //添加购物车
+                AddGoods(index){
+                    console.log("index:",index)
+                    var ctx = this
+                    var params = new URLSearchParams({
+                            pNo: ctx.product[index].pNo
+                        })
+                        axios.post('/JavaWeb/add-shopping-car', params)
+                            .then(function (resp) {
+                                if(resp.data.exist==0){        
+                                    ctx.$message({
+                                        message:'登录超时!请重新登录！',
+                                        type:'error'
+                                    })  
+                                    setTimeout(function(){
+                                        window.location.href='/JavaWeb/index.html';
+                                    },500)
+                                    return false      
+                                }
+                                else {
+                                    ctx.$message({
+                                        message:'加入购物车成功!',
+                                        type:'success'
+                                    });
+                                    ctx.readMoreJug = false
+                                    axios.get('/JavaWeb/load-goods')
+                                    .then(function (resp) {
+                                        ctx.product = resp.data  
+                                        if(ctx.product[0].pNo==="")
+                                            ctx.product=[]
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                    });
+                                }                                                   
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                },
+                
+                //立即购买
+                buyOne(index){
+                    var ctx = this
+                    var params = new URLSearchParams({
+                            pNo: ctx.shoppingCar[index].pNo,
+                            pMoney:ctx.shoppingCar[index].pMoney
+                        })
+                    axios.post('/JavaWeb/buy-one', params)
+                        .then(function (resp) {
+                            if(resp.data.exist==0){        
+                                ctx.$message({
+                                    message:'登录超时!请重新登录！',
+                                    type:'error'
+                                })  
+                                setTimeout(function(){
+                                    window.location.href='/JavaWeb/index.html';
+                                },500)
+                                return false      
+                            }
+                            else if(resp.data.exist == 1){
+                                ctx.$alert('购买成功！请注意查收！',
+                                 'Success', {
+                                confirmButtonText: '确定',
+
+                                });
+                                axios.get('/JavaWeb/load-shopping-car')
+                                .then(function (resp) {
+                                    ctx.shoppingCar = resp.data  
+                                    if(ctx.shoppingCar[0].pNo==="")
+                                        ctx.shoppingCar=[]
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                });
+                            }
+                            else if(resp.data.exist == 2){
+                                ctx.$alert('您的余额不足！请及时充值。',
+                                 '余额不足', {
+                                confirmButtonText: '确定',
+                                });
+                            }  
+                            else if(resp.data.exist==3){
+                                ctx.$alert('对不起已经被抢光啦!',
+                                 '已售罄', {
+                                confirmButtonText: '确定',
+                                });
+                            }
+                            else if(resp.data.exist==4){   
+                                ctx.$alert('对不起您购买的商品已经下架~',
+                                 '已下架', {
+                                confirmButtonText: '确定',
+                                });
+                            }                                             
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                    console.log("立即购买",index)
+                },
+                //立即删除
+                deleteOne(index){
+                    var ctx = this
+                    var params = new URLSearchParams({
+                            pNo: ctx.shoppingCar[index].pNo,
+                            pBuyNum:ctx.shoppingCar[index].pBuyNum
+                        })
+                    axios.post('/JavaWeb/delete-one', params)
+                        .then(function (resp) {
+                            if(resp.data.exist == 0){        
+                                ctx.$message({
+                                    message:'登录超时!请重新登录！',
+                                    type:'error'
+                                })  
+                                setTimeout(function(){
+                                    window.location.href='/JavaWeb/index.html';
+                                },500)
+                                return false      
+                            }
+                            else if(resp.data.exist == 1){
+                                ctx.$alert('成功移出购物车!',
+                                 'Success', {
+                                confirmButtonText: '确定',
+                                });
+                                axios.get('/JavaWeb/load-shopping-car')
+                                .then(function (resp) {
+                                    ctx.shoppingCar = resp.data  
+                                    if(ctx.shoppingCar[0].pNo==="")
+                                        ctx.shoppingCar=[]
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                });
+                            }                                               
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                    console.log("立即删除",index)
+                },
+                //购买全部
+                buyAll(){
+                    var ctx = this
+                    axios.get('/JavaWeb/buy-all')
+                        .then(function (resp) {
+                            console.log("购买全部exist",resp.data.exist)
+                            if(resp.data.exist == 0){        
+                                ctx.$message({
+                                    message:'登录超时!请重新登录！',
+                                    type:'error'
+                                })  
+                                setTimeout(function(){
+                                    window.location.href='/JavaWeb/index.html';
+                                },500)
+                                return false      
+                            }
+                            var mon = ctx.user.uBalance;
+                            for(var i =0 ;i< ctx.shoppingCar.length;i++){
+                                mon -=ctx.shoppingCar[i].pMoney*ctx.shoppingCar[i].pBuyNum;
+                            }
+                            console.log(mon)
+                            if(mon<0){
+                                ctx.$alert('很抱歉!您的余额不足,请及时充值!',
+                                 '余额不足', {
+                                confirmButtonText: '确定',
+                                });
+                                return ;
+                            }
+                            else if(resp.data.exist == 1){
+                                ctx.$alert('恭喜您一键购买成功!',
+                                 'Success', {
+                                confirmButtonText: '确定',
+                                });
+                            } 
+                            else if(resp.data.exist == 3){     
+                            ctx.$alert('很抱歉! [ '+resp.data.failNames+' ] 已售罄或者已下架!',
+                                '已售罄', {
+                            confirmButtonText: '确定',
+                            }); 
+                                
+                            } 
+                            axios.get('/JavaWeb/load-shopping-car')
+                                .then(function (resp) {
+                                    ctx.shoppingCar = resp.data  
+                                    if(ctx.shoppingCar[0].pNo==="")
+                                        ctx.shoppingCar=[]
+                                })
+                                .catch(function (error) {
+                                    console.log(error);
+                                });                                              
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                    console.log("购买全部")
+                },
+                handleBrowsedChange(val){
+                    var ctx = this
+                    ctx.browsedRow = val
+                    for(var i = 0 ;i <ctx.product.length;i++){
+                        if(ctx.product[i].pName===val.pName&&
+                           ctx.product[i].pIntroduce===val.pIntroduce)
+                           {
+                                ctx.productIndex = i
+                                ctx.pParams = []
+                                var p = ctx.product[ctx.productIndex].pDetail.split('|')
+                                for(var i=0;i<p.length;i++){
+                                    ctx.pParams.push({
+                                    value: p[i],
+                                    key: 'val'
+                                    });
+                                }
+                                ctx.readMoreBrowsedJug=true
+                                break
+                            }
+                    }                 
+                }
+            },        
+            mounted: function() {   
+            	var ctx = this         
+                axios.get('/JavaWeb/get-user-info')
+                .then(function (resp) {
+                    console.log(resp.data);
+                    ctx.user = resp.data                    
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }); 
+                axios.get('/JavaWeb/load-goods')
+                .then(function (resp) {
+                    console.log('exist:',resp.data[0].exist);
+                    ctx.product = resp.data
+                    if(ctx.product[0].pNo==="")
+                        ctx.product=[]
+                    
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+
+                             
+            },       
+
+        })   
+    </script>
+</body>
+</html>
